@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: frontend
+      args:
+        - API_URL=http://localhost:9090/api/v1.0
+        - MODE=Server
+        - LAREX_LOCATION=http://localhost:7070/Larex/directLibrary
+    ports:
+      - "8080:80"
+    networks:
+      ocr4all-network:
+  backend:
+    build: backend
+    ports:
+      - "9090:8080"
+    networks:
+      ocr4all-network:
+    environment:
+      - SPRING_PROFILES_ACTIVE=server,api,documentation
+      - OCR4ALL_APPLICATION_SECURITY_ADMINISTRATOR_CREATE=true
+    volumes:
+      - $PWD/ocr4all/exchange:/srv/ocr4all/exchange
+      - $PWD/ocr4all/projects:/srv/ocr4all/workspace/projects
+      - $PWD/ocr4all/workflows:/srv/ocr4all/workspace/workflows
+  larex:
+    build: larex
+    ports:
+      - "7070:8080"
+    volumes:
+      - $PWD/ocr4all/projects:/srv/ocr4all/workspace/projects
+    networks:
+      ocr4all-network:
+  ocrd:
+    image: ocrd/all:maximum
+networks:
+  ocr4all-network:
